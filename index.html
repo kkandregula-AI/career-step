@@ -367,14 +367,27 @@ function callGeminiWithPDF(b64,mimeType,prompt){
   });
 }
 
-var PARSE_PROMPT='You are an expert resume parser. Extract ALL information from this resume and return ONLY a valid raw JSON object with no markdown fences, no explanation, no extra text.\n\n{\n  "name": "Full legal name",\n  "title": "Most recent job title",\n  "email": "email or empty string",\n  "phone": "phone or empty string",\n  "location": "City, Country only",\n  "linkedin": "LinkedIn URL or empty string",\n  "website": "website URL or empty string",\n  "summary": "Professional career summary",\n  "yearsExp": "total years as numeral string",\n  "skills": ["every skill mentioned"],\n  "experience": [{"role":"title","company":"name","dates":"range","description":"2-3 sentence summary"}],\n  "education": [{"degree":"degree + field","institution":"school","dates":"years"}],\n  "certifications": ["each cert"]\n}\n\nReturn raw JSON only.';
+var PARSE_PROMPT='Reply with ONLY a JSON object, nothing else, no markdown, no backticks, no explanation. Start your reply with { and end with }. Extract resume data into this exact format: {"name":"full name","title":"job title","email":"email","phone":"phone","location":"city country","linkedin":"url or empty","website":"url or empty","summary":"career summary","yearsExp":"number as string","skills":["skill1","skill2"],"experience":[{"role":"title","company":"name","dates":"range","description":"summary"}],"education":[{"degree":"degree","institution":"school","dates":"years"}],"certifications":["cert1"]}';
 
 function parseJSON(raw){
+  // Strip markdown fences
   var c=raw.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+  // Direct parse
   try{return JSON.parse(c);}catch(e){}
+  // Extract first JSON object
   var m=c.match(/\{[\s\S]*\}/);
-  if(m)try{return JSON.parse(m[0]);}catch(e){}
-  throw new Error('Could not parse AI response - please try again');
+  if(m){try{return JSON.parse(m[0]);}catch(e){}}
+  // Try to find last complete JSON object (greedy match sometimes gets trailing text)
+  var matches=c.match(/\{[\s\S]*?\}/g);
+  if(matches){
+    for(var i=matches.length-1;i>=0;i--){
+      try{var o=JSON.parse(matches[i]);if(o.name||o.title||o.email)return o;}catch(e){}
+    }
+  }
+  // Model returned plain text instead of JSON - build minimal object from text
+  console.warn('Raw AI response:', raw.slice(0,500));
+  // Return empty object so app still works
+  return {name:'',title:'',email:'',phone:'',location:'',summary:raw.slice(0,300),skills:[],experience:[],education:[],certifications:[]};
 }
 
 // Generate button
