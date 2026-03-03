@@ -338,7 +338,7 @@ function callGemini(prompt){
   return fetch('/.netlify/functions/gemini',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:2000,temperature:0.2}})
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8000,temperature:0.2}})
   }).then(function(r){return r.text().then(function(txt){return{status:r.status,txt:txt};});})
   .then(function(res){
     if(!res.txt||!res.txt.trim())throw new Error('Empty response from server (status '+res.status+')');
@@ -354,7 +354,7 @@ function callGeminiWithPDF(b64,mimeType,prompt){
   return fetch('/.netlify/functions/gemini',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mimeType,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:2000,temperature:0.2}})
+    body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mimeType,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:8000,temperature:0.2}})
   }).then(function(r){return r.text().then(function(txt){return{status:r.status,txt:txt};});})
   .then(function(res){
     if(!res.txt||!res.txt.trim())throw new Error('Empty response from server (status '+res.status+')');
