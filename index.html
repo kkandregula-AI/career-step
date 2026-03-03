@@ -764,7 +764,7 @@ function buildExportHTML() {
 :root{--ink:#0a0a0f;--cream:#faf8f4;--gold:#2563eb;--gl:#bfdbfe;--gd:#1d4ed8;--slate:#4a4a5a;--mist:#e8e6e0;--acc:#2d4a6b;--red:#c0392b;--grn:#27ae60}
 body{background:#faf8f4;padding:2.5rem 2rem;font-family:'DM Sans',sans-serif}
 ${getPortfolioCSS()}
-@media print{body{padding:0}@page{margin:1.2cm}}
+@media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{padding:0}@page{margin:1cm;size:A4}.pf-card{box-shadow:none;border:none;font-size:11px}.pf-stats{display:none}}
 </style>
 </head>
 <body><div class="${cls}">${inner}</div></body>
