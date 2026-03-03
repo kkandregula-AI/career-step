@@ -408,7 +408,7 @@ function callGemini(prompt, max) {
   return fetch('/.netlify/functions/gemini', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:max||2000,temperature:0.2}})
+    body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:max||8000,temperature:0.2}})
   }).then(function(r){ return r.text().then(function(t){ return {s:r.status,t:t}; }); })
   .then(function(res){
     if(!res.t||!res.t.trim()) throw new Error('Empty response (status '+res.s+')');
@@ -431,7 +431,7 @@ function callGeminiWithFile(file, prompt, max) {
     return fetch('/.netlify/functions/gemini', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mime,data:b64}},{text:prompt}]}], generationConfig:{maxOutputTokens:max||2000,temperature:0.2}})
+      body: JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mime,data:b64}},{text:prompt}]}], generationConfig:{maxOutputTokens:max||8000,temperature:0.2}})
     }).then(function(r){ return r.text().then(function(t){ return {s:r.status,t:t}; }); })
     .then(function(res){
       if(!res.t||!res.t.trim()) throw new Error('Empty response (status '+res.s+')');
@@ -452,26 +452,9 @@ let state = {
   layout:'classic', theme:''
 };
 
-const PARSE_PROMPT = `You are an expert resume parser. Extract ALL information from this resume.
-Return ONLY a valid raw JSON object — no markdown fences, no explanation, no surrounding text.
+const PARSE_PROMPT = `Extract resume data and reply with ONLY a JSON object. Start with { and end with }. No markdown. No backticks. No explanation. Just JSON.
 
-{
-  "name": "Full legal name",
-  "title": "Most recent professional job title",
-  "email": "email or empty string",
-  "phone": "phone number or empty string",
-  "location": "City, Country/State ONLY",
-  "linkedin": "LinkedIn URL or empty string",
-  "website": "personal website URL or empty string",
-  "summary": "Professional career summary paragraph only",
-  "yearsExp": "Total years as numeral string e.g. '8'",
-  "skills": ["every skill and technology mentioned"],
-  "experience": [{"role":"title","company":"name","dates":"range","description":"2-3 sentence summary"}],
-  "education": [{"degree":"degree + field","institution":"school","dates":"years"}],
-  "certifications": ["each cert as string"]
-}
-
-Return raw JSON only — no markdown, no backticks.`;
+{"name":"full name","title":"job title","email":"email","phone":"phone","location":"city country","linkedin":"url or empty","website":"url or empty","summary":"career summary","yearsExp":"number","skills":["skill1","skill2"],"experience":[{"role":"title","company":"name","dates":"range","description":"summary"}],"education":[{"degree":"degree","institution":"school","dates":"years"}],"certifications":["cert1"]}`;
 
 // Helpers
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -551,11 +534,11 @@ $('parse-btn').addEventListener('click', async () => {
     let parsed;
     if(state.pdfFile) {
       setProgress(50);
-      const text = await callGeminiWithFile(state.pdfFile, PARSE_PROMPT, 2000);
+      const text = await callGeminiWithFile(state.pdfFile, PARSE_PROMPT, 8000);
       parsed = extractJSON(text);
     } else {
       setProgress(50);
-      const text = await callGemini(PARSE_PROMPT + '\n\nResume:\n"""\n' + state.txtContent + '\n"""', 2000);
+      const text = await callGemini(PARSE_PROMPT + '\n\nResume:\n"""\n' + state.txtContent + '\n"""', 8000);
       parsed = extractJSON(text);
     }
     setProgress(90);
