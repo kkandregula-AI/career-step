@@ -194,7 +194,7 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
         <div class="score-track"><div class="score-bar" id="scorebar"></div></div>
         <div id="tips"></div>
       </div>
-      <button class="btn-p" id="genbtn">✦ Generate Portfolio with AI</button>
+      <button class="btn-p" id="genbtn" disabled>✦ Generate Portfolio with AI</button>
     </div>
     <div class="fields" id="fields">
       <div class="ftitle">Parsed Details</div>
@@ -305,9 +305,13 @@ function pickFile(input){
   S.file = file;
   document.getElementById('dzico').textContent = '\u2705';
   document.getElementById('dztitle').textContent = file.name;
-  document.getElementById('dzsub').textContent = (file.size/1024).toFixed(0)+' KB - ready';
+  document.getElementById('dzsub').textContent = (file.size/1024).toFixed(0)+' KB ready — now click Generate!';
   document.getElementById('dz').style.borderColor = '#27ae60';
   document.getElementById('dz').style.background = '#f0fff4';
+  var btn = document.getElementById('genbtn');
+  btn.disabled = false;
+  btn.style.background = 'linear-gradient(135deg,#1a6b3c,#27ae60)';
+  btn.innerHTML = '\u2728 File ready — Click to Generate Portfolio!';
 }
 function g(id){return document.getElementById(id);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -447,7 +451,8 @@ g('genbtn').addEventListener('click',function(){
     console.error(err);
   }).then(function(){
     btn.disabled=false;
-    btn.innerHTML='✦ Generate Portfolio with AI';
+    btn.style.background='';
+    btn.innerHTML='\u2726 Generate Portfolio with AI';
   });
 });
 
